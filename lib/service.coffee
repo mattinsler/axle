@@ -11,6 +11,6 @@ class Service
     @axle.serve(d.host, d.endpoint) for d in domains
   
   routes: (callback) ->
-    callback(null, @axle.routes)
+    callback?(null, @axle.routes)
 
 module.exports = Service
