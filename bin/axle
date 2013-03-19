@@ -80,20 +80,13 @@ function start_script(original_script, args) {
   require(script_file);
 }
 
-require('coffee-script');
-var Axle = require('../index');
-
-if (process.argv.length === 2) {
-  // Server
-  return Axle.start_server();
-}
-
 // Client
 
 var cmd = process.argv[2]
   , args = process.argv.slice(3);
 
-Axle.start_client();
+require('coffee-script');
+require('../lib/cli').run_client();
 
 if (cmd === 'node') { return start_node(args); }
 if (cmd === 'coffee') { return start_coffee(args); }

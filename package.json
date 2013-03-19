@@ -31,7 +31,8 @@
     "distribute": "latest",
     "portfinder": "latest",
     "colors": "latest",
-    "coupler": "latest"
+    "coupler": "latest",
+    "packed": "latest"
   },
   "devDependencies": {
   },
