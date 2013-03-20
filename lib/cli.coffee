@@ -4,6 +4,7 @@
 # - proxy
 # - web server for status
 
+os = require 'os'
 axle = require '../index'
 walkabout = require 'walkabout'
 exec = require('child_process').exec
@@ -92,6 +93,8 @@ exports.run_server = ->
   servers.push(new axle.Server(instance)) if instance.config.server.enabled
   servers.push(new axle.Service(instance)) if instance.config.service.enabled
   servers.push(new axle.Dns(instance)) if instance.config.dns.enabled
+  
+  servers.push(new axle.OsxResolverManager(instance)) if os.platform() is 'darwin'
   
   servers.forEach (s) -> s.start()
 

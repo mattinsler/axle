@@ -8,3 +8,5 @@ exports.Client = require './lib/client'
 exports.Server = require './lib/server'
 exports.Service = require './lib/service'
 exports.Dns = require './lib/dns'
+
+exports.OsxResolverManager = require './lib/osx_resolver_manager'

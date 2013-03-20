@@ -107,37 +107,6 @@ class Dns
   
   parse: (msg) ->
     DnsRequest.unpack(msg)
-    
-    # read_string = (offset) ->
-    #   length = msg.readUInt8(offset)
-    #   msg.slice(offset + 1, offset + 1 + length).toString('ascii')
-    # 
-    # parsed = {}
-    # 
-    # parsed.qid = msg.readUInt16BE(0)
-    # parsed.flags = msg.readUInt16BE(2)
-    # parsed.qcount = msg.readUInt16BE(4)
-    # parsed.acount = msg.readUInt16BE(6)
-    # parsed.auth_count = msg.readUInt16BE(8)
-    # parsed.addl_count = msg.readUInt16BE(10)
-    # 
-    # offset = 12
-    # 
-    # parsed.domain = []
-    # while msg.readUInt8(offset) isnt 0
-    #   d = read_string(offset)
-    #   parsed.domain.push(d)
-    #   offset += 1 + d.length
-    # 
-    # ++offset
-    # 
-    # parsed.domain = parsed.domain.join('.')
-    # 
-    # parsed.qtype = msg.readUInt16BE(offset)
-    # parsed.qclass = msg.readUInt16BE(offset + 2)
-    # parsed.qtype_readable = REQUEST_TYPES[parsed.qtype] ? 'UNKNOWN'
-    # 
-    # parsed
   
   adjust_response_ttl: (response, ttl) ->
     questions = response.readUInt16BE(4)
@@ -196,46 +165,6 @@ class Dns
     
     @server.send(res, 0, res.length, remote_info.port, remote_info.address)
     
-    # packet = new Buffer(1024)
-    # 
-    # write_string = (str, offset) ->
-    #   packet.writeUInt8(str.length, offset)
-    #   new Buffer(str, 'ascii').copy(packet, offset + 1, 0, str.length)
-    # 
-    # write_ip = (ip, offset) ->
-    #   i = ip.split('.')
-    #   packet.writeUInt8(parseInt(i[0]), offset)
-    #   packet.writeUInt8(parseInt(i[1]), offset + 1)
-    #   packet.writeUInt8(parseInt(i[2]), offset + 2)
-    #   packet.writeUInt8(parseInt(i[3]), offset + 3)
-    # 
-    # packet.writeUInt16BE(parsed.qid, 0)
-    # packet.writeUInt16BE(0x8180, 2)
-    # packet.writeUInt16BE(1, 4) # question count
-    # packet.writeUInt16BE(1, 6) # answer count
-    # packet.writeUInt16BE(0, 8)
-    # packet.writeUInt16BE(0, 10)
-    # 
-    # offset = 12
-    # 
-    # for d in parsed.domain.split('.')
-    #   write_string(d, offset)
-    #   offset += 1 + d.length
-    # 
-    # packet.writeUInt8(0, offset++)
-    # packet.writeUInt16BE(parsed.qtype, offset)
-    # packet.writeUInt16BE(1, offset + 2)
-    # 
-    # packet.writeUInt8(0xc0, offset + 4)
-    # packet.writeUInt8(0x0c, offset + 5)
-    # packet.writeUInt16BE(parsed.qtype, offset + 6)
-    # packet.writeUInt16BE(1, offset + 8)
-    # packet.writeUInt32BE(1, offset + 10) # TTL
-    # packet.writeUInt16BE(4, offset + 14) # IP Length
-    # write_ip(ip_address, offset + 16)
-    # 
-    # @server.send(packet, 0, offset + 20, remote_info.port, remote_info.address)
-  
   on_message: (msg, remote_info) ->
     req = @parse(msg)
     console.log "#{REQUEST_TYPES[req.question.qtype]} #{req.question.domain}"
