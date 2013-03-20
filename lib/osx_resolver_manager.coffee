@@ -23,8 +23,8 @@ class OsxResolverManager
     domain = domain.split('.').slice(-1)[0]
     return @domains[domain] if domain is '*'
     @domains[domain] ?= 0
-    @create_resolver(domain) if ++@domains[domain] > 0
-    @domains[domain]
+    @create_resolver(domain) if @domains[domain] is 0
+    ++@domains[domain]
   
   remove_domain: (domain) ->
     domain = domain.split('.').slice(-1)[0]

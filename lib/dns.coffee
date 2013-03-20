@@ -1,7 +1,6 @@
 dgram = require 'dgram'
 packed = require 'packed'
 walkabout = require 'walkabout'
-DnsServer = require('dnsserver').Server
 
 REQUEST_TYPES =
   A: 1
@@ -19,6 +18,7 @@ domain_string = {
     ).join('.')
     [str, o + 1]
   pack: (buffer, value) ->
+    return [@byte_offset] unless value?
     o = @byte_offset
     for v in value.split('.')
       buffer.writeUInt8(v.length, o++)
@@ -32,6 +32,7 @@ ip_address = {
   unpack: (buffer) ->
     ['', @byte_offset + 4]
   pack: (buffer, value) ->
+    return [@byte_offset] unless value?
     i = value.split('.')
     buffer.writeUInt8(parseInt(i[0]), @byte_offset)
     buffer.writeUInt8(parseInt(i[1]), @byte_offset + 1)
@@ -192,7 +193,6 @@ class Dns
     
     return @respond_with('127.0.0.1', remote_info, req) if req.question.qtype in [REQUEST_TYPES.A, REQUEST_TYPES.AAAA, REQUEST_TYPES.CNAME] and @axle.match(req.question.domain)?
     @fail_dns(remote_info, req)
-    # @forward_dns(remote_info, msg)
   
   start: ->
     @server.bind(53)

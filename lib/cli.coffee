@@ -80,7 +80,7 @@ exports.run_client = ->
     try
       pkg = require(process.cwd() + '/package')
       client.domains ?= pkg['axle-domains']
-      client.domains ?= "#{pkg.name}.localhost.dev"
+      client.domains ?= ["#{pkg.name}.localhost.dev"]
       client.domains ?= []
       client.domains = [domains] unless Array.isArray(domains)
   

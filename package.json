@@ -32,7 +32,9 @@
     "portfinder": "latest",
     "colors": "latest",
     "coupler": "latest",
-    "packed": "latest"
+    "packed": "latest",
+    "commander": "latest",
+    "walkabout": "latest"
   },
   "devDependencies": {
   },
