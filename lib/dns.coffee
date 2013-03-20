@@ -164,14 +164,35 @@ class Dns
     )
     
     @server.send(res, 0, res.length, remote_info.port, remote_info.address)
+  
+  fail_dns: (remote_info, req) ->
+    res = DnsResponse.pack(
+      header:
+        qid: req.header.qid
+        flags:
+          qr: 1
+          rd: 1
+          ra: 1
+          rcode: 3
+        qcount: 1
+        acount: 1
+        auth_count: 0
+        addl_count: 0
+      question:
+        domain: req.question.domain
+        qtype: req.question.qtype
+        qclass: req.question.qclass
+    )
     
+    @server.send(res, 0, res.length, remote_info.port, remote_info.address)
+  
   on_message: (msg, remote_info) ->
     req = @parse(msg)
     console.log "#{REQUEST_TYPES[req.question.qtype]} #{req.question.domain}"
     
-    return @respond_with('127.0.0.1', remote_info, req) if req.question.qtype in [REQUEST_TYPES.A, REQUEST_TYPES.AAAA, REQUEST_TYPES.CNAME] and req.question.domain is 'foo.dev'
     return @respond_with('127.0.0.1', remote_info, req) if req.question.qtype in [REQUEST_TYPES.A, REQUEST_TYPES.AAAA, REQUEST_TYPES.CNAME] and @axle.match(req.question.domain)?
-    @forward_dns(remote_info, msg)
+    @fail_dns(remote_info, req)
+    # @forward_dns(remote_info, msg)
   
   start: ->
     @server.bind(53)
