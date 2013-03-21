@@ -1,7 +1,7 @@
 {
   "name": "axle",
   "description": "An effortless HTTP reverse proxy for node",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "https://github.com/mattinsler/axle",
   "author": {
     "name": "Matt Insler",
