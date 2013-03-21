@@ -17,24 +17,29 @@ nameserver 127.0.0.1
 port #{axle.Configuration.dns.port}
 """
 
-AXLE_PLIST_FILE = walkabout(process.env.HOME).join('Library/LaunchAgents/axle.serverd.plist')
+AXLE_PLIST_FILE = walkabout('/Library/LaunchAgents/com.mattinsler.axle.plist')
 AXLE_DAEMON_PLIST = """
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
         <key>Label</key>
-        <string>axle.serverd</string>
+        <string>com.mattinsler.axle</string>
         <key>ProgramArguments</key>
         <array>
                 <string>#{process.execPath}</string>
-                <string>#{walkabout(__dirname).join('../bin/axle-server').absolute_path}</string>
-                <string>run</string>
+                <string>#{walkabout(__dirname).join('../bin/axle-server-run').absolute_path}</string>
         </array>
         <key>KeepAlive</key>
         <true/>
         <key>RunAtLoad</key>
         <true/>
+        <key>Debug</key>
+        <true/>
+        <key>StandardOutPath</key>
+        <string>/var/log/com.mattinsler.axle.log</string>
+        <key>StandardErrorPath</key>
+        <string>/var/log/com.mattinsler.axle.log</string>
 </dict>
 </plist>
 """
@@ -45,10 +50,12 @@ exports.install = ->
   return Logger.error('Try running with sudo') unless process.getuid() is 0
   
   Logger.info 'mkdirp /etc/resolver'
-  walkabout('/etc/resolver').mkdirp()
+  walkabout('/etc/resolver').mkdirp_sync()
   # Logger.info 'write /etc/resolver/axle'
   # walkabout('/etc/resolver/axle').write_file_sync(AXLE_RESOLVER)
+  
   Logger.info 'write', AXLE_PLIST_FILE.absolute_path
+  walkabout(AXLE_PLIST_FILE.dirname).mkdirp_sync()
   AXLE_PLIST_FILE.write_file_sync(AXLE_DAEMON_PLIST)
   
   Logger.info 'launch axle server'
@@ -87,6 +94,10 @@ exports.run_client = ->
   client.start()
 
 exports.run_server = ->
+  Logger.info 'server'
+  
+  return Logger.error('Try running with sudo') unless process.getuid() is 0
+  
   instance = new axle.Axle()
   
   servers = []
@@ -97,6 +108,13 @@ exports.run_server = ->
   servers.push(new axle.OsxResolverManager(instance)) if os.platform() is 'darwin'
   
   servers.forEach (s) -> s.start()
+  
+  process.on 'SIGTERM', ->
+    servers.forEach (s) -> s.stop()
+    Logger.info 'bye bye'
+    process.exit(0)
+  
+  Logger.info 'started'
 
 exports.daemon = ->
   
