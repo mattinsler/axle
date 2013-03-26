@@ -11,6 +11,10 @@ port #{Configuration.dns.port}
 class OsxResolverManager
   constructor: (@axle) ->
     @domains = {}
+    @files_created = {}
+    process.on 'exit', =>
+      walkabout(f).unlink_sync() for f, x of @files_created
+    
     @axle.routes.forEach (d) => @add_domain(d)
     
     @axle.on 'route:add', (route) =>
@@ -36,15 +40,23 @@ class OsxResolverManager
   create_resolver: (domain) ->
     return unless @running is true
     
-    Logger.info "write /etc/resolver/#{domain}"
-    walkabout('/etc/resolver').mkdirp_sync()
-    walkabout("/etc/resolver/#{domain}").write_file_sync(AXLE_RESOLVER)
+    file = walkabout("/etc/resolver/#{domain}")
+    
+    Logger.info "write #{file.absolute_path}"
+    unless file.exists_sync()
+      file.directory().mkdirp_sync()
+      file.write_file_sync(AXLE_RESOLVER)
+      @files_created[file.absolute_path] = 1
+    @
   
   remove_resolver: (domain) ->
     return unless @running is true
     
-    Logger.info "rm /etc/resolver/#{domain}"
-    walkabout("/etc/resolver/#{domain}").unlink_sync() if walkabout("/etc/resolver/#{domain}").exists_sync()
+    file = walkabout("/etc/resolver/#{domain}")
+    
+    Logger.info "rm #{file.absolute_path}"
+    file.unlink_sync() if file.exists_sync()
+    delete @files_created[file.absolute_path]
   
   start: ->
     @running = true
