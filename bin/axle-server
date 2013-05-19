@@ -1,0 +1,14 @@
+#!/usr/bin/env node
+
+var program = require('commander');
+
+program
+  .version(require('../package').version)
+  
+  .command('run',       'Run the axle server')
+  .command('install',   'Install the axle services to run all the time')
+  .command('uninstall', 'Remove the axle services (you should be ashamed)')
+  // .command('status',    'Check on the ')
+  // .command('daemon',    'Run the axle-server daemon')
+  
+  .parse(process.argv);

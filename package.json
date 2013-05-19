@@ -1,7 +1,7 @@
 {
   "name": "axle",
-  "description": "",
-  "version": "0.0.6",
+  "description": "An effortless HTTP reverse proxy for node",
+  "version": "0.1.1",
   "homepage": "https://github.com/mattinsler/axle",
   "author": {
     "name": "Matt Insler",
@@ -21,7 +21,11 @@
   }],
   "main": "index",
   "bin": {
-    "axle": "./bin/axle"
+    "axle": "./bin/axle",
+    "axle-server": "./bin/axle-server",
+    "axle-server-install": "./bin/axle-server-install",
+    "axle-server-uninstall": "./bin/axle-server-uninstall",
+    "axle-server-run": "./bin/axle-server-run"
   },
   "engines": {
     "node": ">= 0.8.0"
@@ -31,7 +35,10 @@
     "distribute": "latest",
     "portfinder": "latest",
     "colors": "latest",
-    "coupler": "latest"
+    "coupler": "latest",
+    "packed": "latest",
+    "commander": "latest",
+    "walkabout": "latest"
   },
   "devDependencies": {
   },

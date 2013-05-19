@@ -1,4 +1,6 @@
-class Service
+coupler = require 'coupler'
+
+class Client
   constructor: (@axle, @connection) ->
     @connection.on 'coupler:connected', =>
       @domains = []
@@ -12,5 +14,20 @@ class Service
   
   routes: (callback) ->
     callback?(null, @axle.routes)
+
+
+class Service
+  constructor: (@axle) ->
+  
+  start: ->
+    @service = coupler
+      .accept(tcp: @axle.config.service.port)
+      .provide(
+        axle: (connection) =>
+          new Client(@axle, connection)
+      )
+  
+  stop: ->
+    
 
 module.exports = Service

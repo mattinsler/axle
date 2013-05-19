@@ -1,4 +1,5 @@
-events = require 'events'
+{EventEmitter} = require 'events'
+Logger = require './logger'
 
 parse_endpoint = (endpoint) ->
   if parseInt(endpoint).toString() is endpoint.toString()
@@ -13,7 +14,7 @@ parse_endpoint = (endpoint) ->
 class RoutePredicate
   constructor: (@host, @endpoint) ->
     @target = parse_endpoint(@endpoint)
-    
+  
   matches: (host) ->
     @host is host
 
@@ -25,43 +26,16 @@ class WildcardRoutePredicate extends RoutePredicate
   matches: (host) ->
     @rx.test(host)
 
-class Axle extends events.EventEmitter
-  constructor: (@port) ->
-    throw new Error('Axle must take a port that is a number') unless port? and parseInt(port).toString() is port.toString()
-    
-    @log = -> console.log '[' + 'axle'.cyan + '] ' +  arguments[0]
+class Axle extends EventEmitter
+  config: require './configuration'
   
-  initialize: ->
-    return if @server?
-    
-    @server = require('http').createServer()
-    @server.on 'listening', => @emit('listening', @server.address())
-    @server.on 'error', (err) => @emit('error', err)
-    
+  constructor: ->
     @routes = []
-    @distribute = require('distribute')(@server)
-    @distribute.use (req, res, next) =>
-      try
-        [host, _x] = req.headers.host.split(':')
-      
-        for e in @routes
-          if e.matches(host)
-            @emit('route:match', host, e.target)
-            return next(e.target.port, e.target.host)
-        
-        @emit('route:miss', host)
-        next()
-      catch e
-        next(e)
-  
-  start: ->
-    return if @server?
-    @initialize()
-    @server.listen(@port)
-  
-  stop: ->
-    @server.close()
-    delete @server
+    
+    @on 'route:add', (route) -> Logger.info Logger.green('Added') + ' route ' + route.host + ' => ' + route.endpoint
+    @on 'route:remove', (route) -> Logger.info Logger.red('Removed') + ' route ' + route.host + ' => ' + route.endpoint
+    @on 'route:match', (from, to) -> Logger.debug 'Matched route for ' + Logger.yellow(from) + ' to ' + Logger.green("#{to.host}:#{to.port}")
+    @on 'route:miss', (host) -> Logger.debug 'No route for ' + Logger.red(host)
   
   remove: (route) ->
     @routes = @routes.filter (r) =>
@@ -69,12 +43,21 @@ class Axle extends events.EventEmitter
         @emit('route:remove', r)
         return false
       true
-  
+
   serve: (host, endpoint) ->
     if host.indexOf('*') isnt -1
       @routes.push(new WildcardRoutePredicate(host, endpoint))
     else
       @routes.push(new RoutePredicate(host, endpoint))
     @emit('route:add', {host: host, endpoint: endpoint})
+  
+  match: (host) ->
+    for e in @routes
+      if e.matches(host)
+        @emit('route:match', host, e.target)
+        return e.target
+    
+    @emit('route:miss', host)
+    null
 
 module.exports = Axle
