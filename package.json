@@ -15,10 +15,12 @@
   "bugs": {
     "url": "https://github.com/mattinsler/axle/issues"
   },
-  "licenses": [{
-    "type": "MIT",
-    "url": "https://github.com/mattinsler/axle/blob/master/LICENSE-MIT"
-  }],
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/mattinsler/axle/blob/master/LICENSE-MIT"
+    }
+  ],
   "main": "index",
   "bin": {
     "axle": "./bin/axle"
@@ -27,13 +29,12 @@
     "node": ">= 0.8.0"
   },
   "dependencies": {
-    "coffee-script": "latest",
-    "distribute": "latest",
-    "portfinder": "latest",
-    "colors": "latest",
-    "coupler": "latest"
+    "coffee-script": "~1.6.2",
+    "distribute": "~0.1.4",
+    "portfinder": "~0.2.1",
+    "colors": "~0.6.0-1",
+    "coupler": "~0.1.5"
   },
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "keywords": []
 }
