@@ -18,6 +18,7 @@ exports.start_server = ->
   axle.on 'route:miss', (host) -> log 'No route for ' + host.red
   
   axle.start()
+  axle
   
 exports.start_client = ->
   require 'colors'
@@ -44,3 +45,4 @@ exports.start_client = ->
   client.on 'disconnected', -> log 'Lost Connection'.yellow + ' to axle service'
   
   client.start()
+  client
