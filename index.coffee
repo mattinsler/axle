@@ -36,6 +36,8 @@ exports.start_client = ->
       domains ?= []
       domains = [domains] unless Array.isArray(domains)
   
+  return null unless domains?
+  
   axle_service = coupler.connect(tcp: 1313).consume('axle')
   client = new exports.Client(axle_service, domains)
   

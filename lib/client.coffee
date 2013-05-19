@@ -10,6 +10,8 @@ class Client extends EventEmitter
     createServer = http.createServer
     http.createServer = =>
       server = createServer.apply(http, arguments)
+      return server if @intercepted
+      @intercepted = true
       server.on 'error', => @on_server_error(server, arguments...)
       server.on 'listening', => @on_server_listening(server, arguments...)
       server
