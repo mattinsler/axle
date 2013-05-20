@@ -4,7 +4,7 @@ portfinder = require 'portfinder'
 EventEmitter = require('events').EventEmitter
 
 class Client extends EventEmitter
-  constructor: (@axle_service, @domains) ->
+  constructor: (@socket, @domains) ->
   
   start: ->
     createServer = http.createServer
@@ -25,14 +25,13 @@ class Client extends EventEmitter
   on_server_listening: (server) ->
     @emit('listening', server)
     
-    @axle_service.on 'coupler:connected', =>
-      @axle_service.register(@domains.map (d) -> {host: d, endpoint: server.address().port})
+    @socket.on 'start', =>
+      @socket.send(['register'], @domains.map (d) -> {host: d, endpoint: server.address().port})
+      return @emit('reconnected', server) if @connected_once
+      @connected_once = true
       @emit('connected', server)
     
-    @axle_service.on 'coupler:reconnected', =>
-      @emit('reconnected', server)
-    
-    @axle_service.on 'coupler:disconnected', =>
+    @socket.on 'close', =>
       @emit('disconnected', server)
   
 module.exports = Client

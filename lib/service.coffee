@@ -1,9 +1,11 @@
 class Service
-  constructor: (@axle, @connection) ->
-    @connection.on 'coupler:connected', =>
-      @domains = []
-    @connection.on 'coupler:disconnected', =>
+  constructor: (@axle, @socket) ->
+    @domains = []
+    
+    @socket.on 'close', =>
       @axle.remove(d) for d in @domains
+    
+    @socket.data(['register'], @register.bind(@))
   
   register: (domains) ->
     domains = [domains] unless Array.isArray(domains)

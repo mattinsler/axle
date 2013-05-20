@@ -4,12 +4,14 @@ exports.Service = require './lib/service'
 
 exports.start_server = ->
   require 'colors'
-  coupler = require 'coupler'
+  nssocket = require 'nssocket'
   
   log = -> console.log '[' + 'axle'.cyan + '] ' +  arguments[0]
   
   axle = new exports.Axle(process.env.PORT || 3000)
-  coupler.accept(tcp: 1313).provide(axle: (connection) -> new exports.Service(axle, connection))
+  service = nssocket.createServer (socket) ->
+    new exports.Service(axle, socket)
+  service.listen(1313)
   
   axle.on 'listening', (address) -> log 'Listening on port ' + address.port.toString().green
   axle.on 'route:add', (route) -> log 'Added'.green + ' route ' + route.host + ' => ' + route.endpoint
@@ -22,7 +24,7 @@ exports.start_server = ->
   
 exports.start_client = ->
   require 'colors'
-  coupler = require 'coupler'
+  nssocket = require 'nssocket'
   
   log = -> console.log '[' + 'axle'.cyan + '] ' +  arguments[0]
   
@@ -38,7 +40,8 @@ exports.start_client = ->
   
   return null unless domains?
   
-  axle_service = coupler.connect(tcp: 1313).consume('axle')
+  axle_service = new nssocket.NsSocket(reconnect: true)
+  axle_service.connect(1313)
   client = new exports.Client(axle_service, domains)
   
   client.on 'listening', (server) -> log 'Listening on port ' + server.address().port.toString().green
