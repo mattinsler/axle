@@ -2,6 +2,10 @@ class Service
   constructor: (@axle, @socket) ->
     @domains = []
     
+    @socket.on 'error', ->
+      console.log 'ERROR'
+      console.log arguments
+    
     @socket.on 'close', =>
       @axle.remove(d) for d in @domains
     

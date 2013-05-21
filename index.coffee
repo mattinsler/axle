@@ -10,7 +10,8 @@ exports.start_server = ->
   
   axle = new exports.Axle(process.env.PORT || 3000)
   service = nssocket.createServer (socket) ->
-    new exports.Service(axle, socket)
+    socket.on 'start', ->
+      new exports.Service(axle, socket)
   service.listen(1313)
   
   axle.on 'listening', (address) -> log 'Listening on port ' + address.port.toString().green
@@ -40,7 +41,11 @@ exports.start_client = ->
   
   return null unless domains?
   
-  axle_service = new nssocket.NsSocket(reconnect: true)
+  axle_service = new nssocket.NsSocket(
+    reconnect: true
+    maxRetries: 9999999999
+    retryInterval: 1
+  )
   axle_service.connect(1313)
   client = new exports.Client(axle_service, domains)
   
