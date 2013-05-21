@@ -1,7 +1,7 @@
 {
   "name": "axle",
-  "description": "",
-  "version": "0.2.0",
+  "description": "An effortless HTTP reverse proxy for node",
+  "version": "0.2.1",
   "homepage": "https://github.com/mattinsler/axle",
   "author": {
     "name": "Matt Insler",
@@ -33,7 +33,7 @@
     "distribute": "~0.1.4",
     "portfinder": "~0.2.1",
     "colors": "~0.6.0-1",
-    "nssocket": "~0.5.1"
+    "nssocket": "git://github.com/mattinsler/nssocket.git"
   },
   "devDependencies": {},
   "keywords": []

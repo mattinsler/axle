@@ -2,14 +2,13 @@ class Service
   constructor: (@axle, @socket) ->
     @domains = []
     
-    @socket.on 'error', ->
-      console.log 'ERROR'
-      console.log arguments
-    
+    @socket.on 'error', -> # eat it
     @socket.on 'close', =>
       @axle.remove(d) for d in @domains
     
-    @socket.data(['register'], @register.bind(@))
+    @socket.data ['axle', 'register'], (data) =>
+      @register(data.domains)
+      @socket.send(['axle', 'register', 'ack'], data)
   
   register: (domains) ->
     domains = [domains] unless Array.isArray(domains)

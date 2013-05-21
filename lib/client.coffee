@@ -5,11 +5,17 @@ EventEmitter = require('events').EventEmitter
 
 class Client extends EventEmitter
   constructor: (@socket, @domains) ->
-    @socket.on 'error', ->
-      # eat it
-    @socket.on 'start', =>
-      @is_connected = true
     @is_connected = @socket.connected
+    @was_previously_connected = false
+    
+    @socket.on 'error', -> # eat it
+    @socket.on 'start', => @is_connected = true
+    @socket.on 'close', => @is_connected = false
+    
+    @socket.data ['axle', 'register', 'ack'], (data) =>
+      return @emit('reconnected', @server) if @was_previously_connected is true
+      @was_previously_connected = true
+      @emit('connected', @server)
   
   start: ->
     createServer = http.createServer
@@ -27,24 +33,18 @@ class Client extends EventEmitter
         return @emit('error', e) if e?
         server.listen(port)
   
+  register: ->
+    domain_data = @domains.map (d) => {host: d, endpoint: @server.address().port}
+    @socket.send(['axle', 'register'], domains: domain_data)
+  
   on_server_listening: (server) ->
-    @emit('listening', server)
+    @server = server
+    @emit('listening', @server)
     
-    emit_connected = =>
-      return @emit('reconnected', server) if @was_previously_connected
-      @was_previously_connected = true
-      @emit('connected', server)
+    @register() if @is_connected
     
-    if @socket.connected
-      @socket.send(['register'], @domains.map (d) -> {host: d, endpoint: server.address().port})
-      emit_connected()
-    
-    @socket.on 'start', =>
-      @socket.send(['register'], @domains.map (d) -> {host: d, endpoint: server.address().port})
-      emit_connected()
-    
+    @socket.on 'start', => @register()
     @socket.on 'close', =>
-      @emit('disconnected', server) if @is_connected
-      @is_connected = false
+      @emit('disconnected', @server) if @is_connected
 
 module.exports = Client
